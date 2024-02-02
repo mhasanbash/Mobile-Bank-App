@@ -47,6 +47,8 @@
 
     <!-- Template Stylesheet -->
     <link href="{% static 'management/css/style.css' %}" rel="stylesheet" />
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   </head>
 
   <body>
@@ -108,7 +110,7 @@
                 <a href="element.html" class="dropdown-item">Other Elements</a>
               </div>
             </div>
-            <a href="widget.html" class="nav-item nav-link"
+            <a href="{% url 'management:MakeTransection' %}" class="nav-item nav-link"
               ><i class="fa fa-th me-2"></i>انتقال وجه</a
             >
             <a href="form.html" class="nav-item nav-link"
@@ -280,6 +282,7 @@
         <!-- Navbar End -->
         {% block Dashboard %} {% endblock %}
         {% block Created_acc %} {% endblock %}
+        {% block transfer %} {% endblock %}
       </div>
       <!-- Content End -->
       
@@ -299,7 +302,6 @@
     <script src="{% static 'management/lib/tempusdominus/js/moment.min.js' %}"></script>
     <script src="{% static 'management/lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
     <script src="{% static 'management/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
-
     <!-- Template Javascript -->
     <script src="{% static 'management/js/main.js' %}"></script>
   </body>

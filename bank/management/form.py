@@ -31,5 +31,29 @@ class CreateAccForm(forms.Form):
         self.fields['acc_number'].widget.attrs.update({'class': 'form-control'}) 
         self.fields['acc_status'].widget.attrs.update({'class': 'form-check-input'})
 
+class MakeTransactionForm(forms.Form):
+    src_account_number = forms.CharField(max_length=32)
+    dst_account_number = forms.CharField(max_length=32)
+    amount = forms.IntegerField()
+    password = forms.CharField(max_length=32)
+    name = forms.CharField(max_length=32)
 
-    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['src_account_number'].widget.attrs.update({'class': 'form-control'})
+        self.fields['src_account_number'].widget.attrs.update({'id': 'src_account_number'})
+
+        self.fields['dst_account_number'].widget.attrs.update({'class': 'form-control'})
+        self.fields['dst_account_number'].widget.attrs.update({'id': 'dst_account_number'})
+        
+        self.fields['amount'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password'].widget.attrs.update({'class': 'form-control'})
+        self.fields['name'].widget.attrs.update({'class': 'form-control'})
+        self.fields['name'].widget.attrs.update({'id': 'name'})
+        self.fields['name'].widget.attrs['readonly'] = True
+
+        self.fields['password'].widget.attrs.update({'id': 'password'})
+        # self.fields['password'].widget.attrs.update({'style': 'display: none;'})
+        
+        
+        

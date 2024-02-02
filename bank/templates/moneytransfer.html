@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block transfer %}
+<div class="container-fluid pt-4 px-4">
+  <div class="row g-4">
+    <div class="col-sm-12 col-xl-6">
+      <div class="bg-light rounded h-100 p-4">
+        <button id="my-button" type="" class="btn btn-warning rounded-pill m-2">
+          check destination account name
+        </button>
+        <form method="post" action="">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label"
+              >source Account</label
+            >{{ form.src_account_number }}
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label"
+              >destination Account</label
+            >{{ form.dst_account_number }}
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">amount</label
+            >{{form.amount }}
+          </div>
+          <div id="hide" style="display: none">
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">name</label>
+              {{form.name}}
+            </div>
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">password</label
+              >{{ form.password }}
+            </div>
+            <button type="submit" class="btn btn-primary rounded-pill m-2">
+              APPLY
+            </button>
+          </div>
+          <div id="hide2" style="display: none" class="p-2 mb-2 bg-danger text-white">
+            <div class="mb-3">
+              <label for="exampleInputPassword1" class="form-label"
+                >Error</label
+              >
+              <input
+                readonly
+                type="Error"
+                class="form-control"
+                id="error"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  $(document).ready(function () {
+    $("#my-button").click(function () {
+      $("#hide").hide();
+      $("#hide2").hide();
+      $.ajax({
+        url: "/accountdetail",
+        type: "GET",
+        data: {
+          account_number: $("#dst_account_number").val(),
+        },
+        success: function (response) {
+          if (response == "شماره حساب اشتباه است") {
+            $("#error").val(response);
+            $("#hide2").show();
+          } else {
+            $("#name").val(response);
+            $("#hide").show();
+          }
+        },
+      });
+    });
+  });
+</script>
+{% endblock %}

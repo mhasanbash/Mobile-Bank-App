@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .form import SignInForm, CreateAccForm
+from .form import SignInForm, CreateAccForm, MakeTransactionForm
 from django.views import View
 from django.http import HttpResponse
 from django.db import connection
@@ -25,9 +25,6 @@ class Home(View):
         
 
 
-    def post(self, request):
-        # کد برای پردازش درخواست POST
-        return HttpResponse("This is a POST response")
 
 class Profile(View):
     def get(self, request):
@@ -59,12 +56,12 @@ class CreatedBankAccount(View):
                                 , [request.session['user_id'], data['acc_number'], data['password'], data['balance'] , date_opened, data['acc_status']])
                     
             except Exception as e:
-                return render(request, 'error.html', {'error_message': form})
+                return render(request, 'error.html', {'error_message': str(e)})
             
             return HttpResponseRedirect(reverse('management:Home'))
         
         else:
-            return render(request, 'error.html', {'error_message': form})
+            return render(request, 'error.html', {'error_message': form.errors})
 
 
 
@@ -82,11 +79,12 @@ class Signin(View):
 
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-
+            
             try : 
                 with connection.cursor() as cursor:
                     cursor.execute("SELECT * FROM USERS WHERE username = %s and password = %s", [username, password])
                     instances = cursor.fetchall()
+                    
                     if instances:
                         request.session['user_id'] = instances[0][0]
                         request.session['username'] = instances[0][1]
@@ -96,7 +94,7 @@ class Signin(View):
                         request.session['address'] = instances[0][5]
                         request.session['phonenumber'] = instances[0][6]
                         request.session['email'] = instances[0][7]
-                        request.session['date_joined'] = instances[0][8]
+                        request.session['date_joined'] = instances[0][8].isoformat()
                         request.session['is_superuser'] = instances[0][9]
                     return HttpResponseRedirect(reverse('management:Home'))
 
@@ -129,9 +127,22 @@ class LastTransectionsDate(View):
     # acc_number and start date and end date
     pass
 
-class AccountDetail(View):
-    # acc_number
-    pass
+def account_detail(request):
+    response = ""
+    if request.method == 'GET':
+            account_number = request.GET['account_number']
+            print(account_number)
+            try : 
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT usr.first_name , usr.last_name FROM BANK_ACCOUNT as acc, USERS as usr WHERE acc.account_number = %s and acc.user_id = usr.id", [account_number])
+                    instances = cursor.fetchall()
+                    response = instances[0][0] + " " + instances[0][1]    
+            except Exception as e:
+                response = "شماره حساب اشتباه است"
+
+
+    return HttpResponse(response)
+
 
 class AccountOwner(View):
     # acc_number
@@ -143,7 +154,11 @@ class BlockAccount(View):
 
 class MakeTransection(View):
     # source acc_num and dest acc_num and amount
-    pass
+    
+    def get(self, request):
+        form = MakeTransactionForm()
+        return render(request, 'moneytransfer.html', {'form' : form})
+    
 
 class CalculateLoanPoint(View):
     # acc_number

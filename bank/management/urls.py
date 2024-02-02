@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import Home, Profile, Signin, signout, CreatedBankAccount
+from .views import Home, Profile, Signin, signout, CreatedBankAccount, MakeTransection, account_detail
 
 app_name = 'management'
 
@@ -10,4 +10,6 @@ urlpatterns = [
     path('signin/', Signin.as_view(), name='signin'),
     path('signout/', signout, name='signout'),
     path('createacc/', CreatedBankAccount.as_view(), name='created_bank_account'),
+    path('transfer/', MakeTransection.as_view(), name='MakeTransection'),
+    path('accountdetail/', account_detail, name='accountdetail')
 ]
