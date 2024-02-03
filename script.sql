@@ -55,45 +55,50 @@ CREATE TABLE TRANSACTIONS
 );
 
 
-insert into USERS values(1,'hasan','hasan','hassan','hassany','isfahan','','','2019.2.1',True);
-insert into USERS values(2,'admin','admin','admin','admin','isfahan','admin','admin','','');
-
-INSERT INTO BANK_ACCOUNT(user_id,account_number,primary_password,Balance,date_opened,account_status)VALUES(1,'54156',1234,1000,'2017-06-15',true);
 
 
-CREATE OR REPLACE PROCEDURE transfer_funds(
-  source_account INT,
-  destination_account INT,
+
+
+CREATE OR REPLACE FUNCTION transfer_fund(
+  IN source_account varchar(32),
+  IN destination_account varchar(32),
+  IN transfer_amount DEC,
+  IN pass varchar(20)
+) RETURNS TABLE (
+  id INT,
+  source_account_number varchar(32),
+  destination_account_number varchar(32),
   amount DEC,
-  pass varchar(4)
+  transaction_date date,
+  status BOOLEAN
 ) LANGUAGE plpgsql
 AS $$
 DECLARE
   source_balance DEC;
+  new_transaction RECORD;
 BEGIN
     -- check the balance of the source account
     SELECT balance INTO source_balance FROM BANK_ACCOUNT WHERE account_number = source_account and primary_password = pass;
 
     -- if the source account has enough funds
-    IF source_balance >= amount THEN
+    IF source_balance >= transfer_amount THEN
         -- subtracting the amount from the source account
-        UPDATE BANK_ACCOUNT SET balance = balance - amount WHERE account_number = source_account;
+        UPDATE BANK_ACCOUNT SET balance = balance - transfer_amount WHERE account_number = source_account;
 
         -- adding the amount to the destination account
-        UPDATE BANK_ACCOUNT SET balance = balance + amount WHERE account_number = destination_account;
+        UPDATE BANK_ACCOUNT SET balance = balance + transfer_amount WHERE account_number = destination_account;
 
-        -- creating a new transaction record
+        -- creating a new transaction record and storing its details in new_transaction
         INSERT INTO TRANSACTIONS (source_account_number, destination_account_number, amount, transaction_date, status)
-        VALUES (source_account, destination_account, amount, NOW(), TRUE);
+        VALUES (source_account, destination_account, transfer_amount, NOW(), TRUE)
+        RETURNING * INTO new_transaction;
+
+        -- returning the details of new_transaction
+        RETURN QUERY SELECT new_transaction.id, new_transaction.source_account_number, new_transaction.destination_account_number, new_transaction.amount, new_transaction.transaction_date, new_transaction.status;
     ELSE
         -- if the source account does not have enough funds, raise an exception
         RAISE EXCEPTION 'Insufficient funds in source account';
     END IF;
 
-    COMMIT;
 END;
 $$;
-
-SELECT usr.first_name , usr.last_name
-FROM BANK_ACCOUNT as acc, USERS as usr
-WHERE acc.account_number = '64648238317022143105' and acc.user_id = usr.id
