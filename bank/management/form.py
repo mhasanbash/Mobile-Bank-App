@@ -58,7 +58,7 @@ class MakeTransactionForm(forms.Form):
 class AccountTurnoverForm(forms.Form):
     acc_number = forms.CharField(max_length=32)
     number = forms.IntegerField(required=False)
-    start_date = forms.DateField(required=False)
-    end_date = forms.DateField(required=False)
+    start_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
         
         

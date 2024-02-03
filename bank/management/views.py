@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .form import SignInForm, CreateAccForm, MakeTransactionForm
+from .form import SignInForm, CreateAccForm, MakeTransactionForm, AccountTurnoverForm
 from django.views import View
 from django.http import HttpResponse
 from django.db import connection
@@ -120,7 +120,65 @@ class AccountDetail(View):
 class LastTransections(View):
     # acc_number and number
     def get(self, request):
-        pass
+        form = AccountTurnoverForm()
+        return render(request, 'account_turnover.html', {'form':form})
+    
+    def post(self, request):
+        form = AccountTurnoverForm(request.POST)
+        if form.is_valid():
+            acc_number  = form.cleaned_data['acc_number']
+            number  = form.cleaned_data['number']
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+
+            if (number):
+                try : 
+                    result=[]
+                    with connection.cursor() as cursor:
+                        cursor.execute('SELECT last_transactions(%s, %s)' , [acc_number, number])
+                        instances = cursor.fetchall()
+                        for ins in instances:
+                            ins = ins[0]
+                            ins = ins[1: len(ins) - 1]
+                            ins = ins.split(',')
+                            res = {
+                                "src_num" : ins[1],
+                                "dst_num" : ins[2],
+                                "amount" : ins[3],
+                                "date" : ins[4]
+                            }
+                            result.append(res)
+                        print("salam",result)
+                        return render(request, 'last_transaction.html', {'results': result})
+
+                except Exception as e:
+                    return render(request, 'error.html', {'error_message': str(e)})
+            else:
+                try : 
+                    result=[]
+                    with connection.cursor() as cursor:
+                        cursor.execute('SELECT last_transactions_date(%s, %s, %s)' , [acc_number, start_date, end_date])
+                        instances = cursor.fetchall()
+                        for ins in instances:
+                            ins = ins[0]
+                            ins = ins[1: len(ins) - 1]
+                            ins = ins.split(',')
+                            res = {
+                                "src_num" : ins[1],
+                                "dst_num" : ins[2],
+                                "amount" : ins[3],
+                                "date" : ins[4]
+                            }
+                            result.append(res)
+                        print("salam",result)
+                        return render(request, 'last_transaction.html', {'results': result})
+
+                except Exception as e:
+                    return render(request, 'error.html', {'error_message': str(e)})
+        
+        else:
+            return render(request, 'error.html', {'error_message': 'form in not valid! error!'})
+
 
 
 class LastTransectionsDate(View):

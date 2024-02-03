@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import Home, Profile, Signin, signout, CreatedBankAccount, MakeTransection, account_detail
+from .views import Home, Profile, Signin, signout, CreatedBankAccount, MakeTransection, account_detail, LastTransections
 
 app_name = 'management'
 
@@ -13,5 +13,5 @@ urlpatterns = [
     path('transfer/', MakeTransection.as_view(), name='MakeTransection'),
     path('accountdetail/', account_detail, name='accountdetail'),
     path('successful/', account_detail, name='successful'),
-    path('account_turnover/', account_detail, name='account_turnover'),
+    path('account_turnover/', LastTransections.as_view(), name='account_turnover'),
 ]
