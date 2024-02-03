@@ -35,7 +35,7 @@ class MakeTransactionForm(forms.Form):
     src_account_number = forms.CharField(max_length=32)
     dst_account_number = forms.CharField(max_length=32)
     amount = forms.IntegerField()
-    password = forms.CharField(max_length=32)
+    password = forms.CharField(max_length=4)
     name = forms.CharField(max_length=32)
 
     def __init__(self, *args, **kwargs):
@@ -53,7 +53,12 @@ class MakeTransactionForm(forms.Form):
         self.fields['name'].widget.attrs['readonly'] = True
 
         self.fields['password'].widget.attrs.update({'id': 'password'})
-        # self.fields['password'].widget.attrs.update({'style': 'display: none;'})
-        
+
+
+class AccountTurnoverForm(forms.Form):
+    acc_number = forms.CharField(max_length=32)
+    number = forms.IntegerField(required=False)
+    start_date = forms.DateField(required=False)
+    end_date = forms.DateField(required=False)
         
         

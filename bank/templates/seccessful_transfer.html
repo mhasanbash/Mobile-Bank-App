@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block transfer %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-6">
+            <div class="bg-light rounded h-100 p-4">
+                <h6 class="mb-4">Basic Table</h6>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">حساب</th>
+                            <th scope="col">صورت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>source account number</td>
+                            <td>{{result.src_num}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>destination account number</td>
+                            <td>{{result.dst_num}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td>amount</td>
+                            <td>{{result.amount}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="p-2 mb-2 bg-success text-white">عملیات با موفقیت انجام شد</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

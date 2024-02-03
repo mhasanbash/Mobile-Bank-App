@@ -24,8 +24,6 @@ class Home(View):
             return render(request, 'error.html', {'error_message': str(e)})
         
 
-
-
 class Profile(View):
     def get(self, request):
         # کد برای پردازش درخواست GET
@@ -34,7 +32,6 @@ class Profile(View):
     def post(self, request):
         # کد برای پردازش درخواست POST
         return HttpResponse("This is a POST response")
-
 
 
 class CreatedBankAccount(View):
@@ -62,7 +59,6 @@ class CreatedBankAccount(View):
         
         else:
             return render(request, 'error.html', {'error_message': form.errors})
-
 
 
 class Signin(View):
@@ -115,13 +111,17 @@ class changePassword(View):
     # user id and old_pass and new_pass
     pass
 
+
 class AccountDetail(View):
     # user id
     pass
 
+
 class LastTransections(View):
     # acc_number and number
-    pass
+    def get(self, request):
+        pass
+
 
 class LastTransectionsDate(View):
     # acc_number and start date and end date
@@ -139,9 +139,8 @@ def account_detail(request):
                     response = instances[0][0] + " " + instances[0][1]    
             except Exception as e:
                 response = "شماره حساب اشتباه است"
-
-
     return HttpResponse(response)
+
 
 
 class AccountOwner(View):
@@ -154,10 +153,39 @@ class BlockAccount(View):
 
 class MakeTransection(View):
     # source acc_num and dest acc_num and amount
-    
     def get(self, request):
         form = MakeTransactionForm()
         return render(request, 'moneytransfer.html', {'form' : form})
+    
+    def post(self, request):
+        form = MakeTransactionForm(request.POST)
+        if form.is_valid():
+
+            source_account  = form.cleaned_data['src_account_number']
+            destination_account  = form.cleaned_data['dst_account_number']
+            amount = form.cleaned_data['amount']
+            password = form.cleaned_data['password']
+            
+            try : 
+                with connection.cursor() as cursor:
+                    cursor.execute('SELECT transfer_fund(%s, %s, %s, %s)' , [source_account, destination_account, amount, password])
+                    instances = cursor.fetchall()
+                    res = instances[0][0]
+                    res = res[1: len(res) - 1]
+                    res = res.split(',')
+                    result = {
+                        "src_num" : res[1],
+                        "dst_num" : res[2],
+                        "amount" : res[3],
+                    }
+                    print(tuple(res))
+
+                    return render(request, 'seccessful_transfer.html', {'result': result})
+
+            except Exception as e:
+                return render(request, 'error.html', {'error_message': str(e)})
+        else:
+            return render(request, 'error.html', {'error_message': 'error!'})
     
 
 class CalculateLoanPoint(View):

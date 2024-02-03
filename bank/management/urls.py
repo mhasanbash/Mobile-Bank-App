@@ -11,5 +11,7 @@ urlpatterns = [
     path('signout/', signout, name='signout'),
     path('createacc/', CreatedBankAccount.as_view(), name='created_bank_account'),
     path('transfer/', MakeTransection.as_view(), name='MakeTransection'),
-    path('accountdetail/', account_detail, name='accountdetail')
+    path('accountdetail/', account_detail, name='accountdetail'),
+    path('successful/', account_detail, name='successful'),
+    path('account_turnover/', account_detail, name='account_turnover'),
 ]
