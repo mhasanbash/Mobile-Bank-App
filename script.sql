@@ -102,3 +102,50 @@ BEGIN
 
 END;
 $$;
+
+
+
+CREATE OR REPLACE FUNCTION last_transactions(
+  IN source_account varchar(32),
+  IN n INT
+) RETURNS TABLE (
+  id INT,
+  src_account_number varchar(32),
+  destination_account_number varchar(32),
+  amount DEC,
+  transaction_date date,
+  status BOOLEAN
+) LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT t.id, t.source_account_number, t.destination_account_number, t.amount, t.transaction_date,t.status
+    FROM TRANSACTIONS as t
+    WHERE  t.source_account_number = source_account
+    ORDER BY transaction_date ASC
+    LIMIT n;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION last_transactions_date(
+  IN source_account varchar(32),
+  IN start_date DATE,
+  IN end_date DATE
+) RETURNS TABLE (
+  id INT,
+  src_account_number varchar(32),
+  destination_account_number varchar(32),
+  amount DEC,
+  transaction_date date,
+  status BOOLEAN
+) LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT t.id, t.source_account_number, t.destination_account_number, t.amount, t.transaction_date,t.status
+    FROM TRANSACTIONS as t
+    WHERE  t.transaction_date >= start_date and t.transaction_date<= end_date and (t.source_account_number = source_account or t.destination_account_number = source_account)
+    ORDER BY transaction_date ASC;
+END;
+$$;
