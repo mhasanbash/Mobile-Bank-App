@@ -79,6 +79,31 @@ CREATE TABLE MINIMUMMONEY
 );
 
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION account_list(
+  IN i_user_id integer
+) RETURNS TABLE (
+  id                 integer,
+  user_id            integer,
+  account_number     varchar(20),
+  primary_password   varchar(4),
+  secondary_password varchar(6),
+  Balance            numeric(20, 2),
+  rate               numeric(10, 2),
+  date_opened        DATE,
+  date_closed        DATE,
+  account_status     boolean
+) LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT *
+    FROM BANK_ACCOUNT as ba
+    WHERE ba.user_id = i_user_id;
+END;
+$$;
+
+
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE PROCEDURE change_password(
   IN p_user_id integer,
