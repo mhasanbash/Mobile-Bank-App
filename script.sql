@@ -55,7 +55,34 @@ CREATE TABLE TRANSACTIONS
 );
 
 
+CREATE OR REPLACE PROCEDURE create_account(
+  IN p_user_id integer,
+  IN p_account_number varchar(20),
+  IN p_primary_password varchar(4),
+  IN p_balance numeric(20, 2),
+  IN p_date_opened date,
+  IN p_account_status boolean
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  -- ایجاد یک transaction
+  BEGIN
+    -- ایجاد یک نمونه در جدول BANK_ACCOUNT
+    INSERT INTO BANK_ACCOUNT(user_id, account_number, primary_password, Balance, date_opened, account_status)
+    VALUES (p_user_id, p_account_number, p_primary_password, p_balance, p_date_opened, p_account_status);
 
+    -- ایجاد یک نمونه در جدول MINIMUMMONEY
+    INSERT INTO MINIMUMMONEY(account_number, min_amount, date)
+    VALUES (p_account_number, p_balance, p_date_opened);
+  EXCEPTION
+    WHEN OTHERS THEN
+      ROLLBACK;
+      RAISE;
+  END;
+  COMMIT;
+END;
+$$;
 
 
 
