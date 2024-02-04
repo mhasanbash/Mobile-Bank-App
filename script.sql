@@ -120,6 +120,17 @@ BEGIN
         VALUES (source_account, destination_account, transfer_amount, NOW(), TRUE)
         RETURNING * INTO new_transaction;
 
+        ----------------------------------------------------------------------
+
+        UPDATE MINIMUMMONEY
+        SET min_amount = source_balance - transfer_amount
+        WHERE date <= (CURRENT_DATE - INTERVAL '2 months') AND account_number = source_account;
+
+        UPDATE MINIMUMMONEY
+        SET min_amount = LEAST(min_amount, source_balance - transfer_amount)
+        WHERE date > (CURRENT_DATE - INTERVAL '2 months') AND account_number = source_account;
+
+        -----------------------------------------------------------------------
         -- returning the details of new_transaction
         RETURN QUERY SELECT new_transaction.id, new_transaction.source_account_number, new_transaction.destination_account_number, new_transaction.amount, new_transaction.transaction_date, new_transaction.status;
     ELSE
