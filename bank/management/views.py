@@ -48,10 +48,12 @@ class CreatedBankAccount(View):
             date_opened = data['date_open'].strftime('%Y-%m-%d')
             print(request.session['user_id'], data['acc_number'], data['password'], data['balance'], 0 , date_opened, data['acc_status'])
             try : 
-                with connection.cursor() as cursor:
-                    cursor.execute("INSERT INTO BANK_ACCOUNT (user_id, account_number, primary_password, Balance, date_opened, account_status) VALUES (%s, %s, %s, %s, %s, %s)"
-                                , [request.session['user_id'], data['acc_number'], data['password'], data['balance'] , date_opened, data['acc_status']])
-                    
+                # with connection.cursor() as cursor:
+                #     cursor.execute("INSERT INTO BANK_ACCOUNT (user_id, account_number, primary_password, Balance, date_opened, account_status) VALUES (%s, %s, %s, %s, %s, %s)"
+                #                 , [request.session['user_id'], data['acc_number'], data['password'], data['balance'] , date_opened, data['acc_status']])
+                with connection.cursor() as cursor:  
+                    cursor.execute("CALL create_account(%s, %s, %s, %s, %s, %s)", [request.session['user_id'], data['acc_number'], data['password'], data['balance'] , date_opened, data['acc_status']])
+
             except Exception as e:
                 return render(request, 'error.html', {'error_message': str(e)})
             
@@ -180,11 +182,6 @@ class LastTransections(View):
             return render(request, 'error.html', {'error_message': 'form in not valid! error!'})
 
 
-
-class LastTransectionsDate(View):
-    # acc_number and start date and end date
-    pass
-
 def account_detail(request):
     response = ""
     if request.method == 'GET':
@@ -248,7 +245,16 @@ class MakeTransection(View):
 
 class CalculateLoanPoint(View):
     # acc_number
-    pass
+    def get(self, request):
+        try : 
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT acc.account_number, m.min_amount, m.active_loan FROM BANK_ACCOUNT as acc, MINIMUMMONEY as m WHERE acc.user_id = %s and acc.account_number = m.account_number',[request.session['user_id']])
+                instances = cursor.fetchall()
+                print(instances)
+                return render(request, 'point.html', {'results' : instances})
+        except Exception as e:
+                return render(request, 'error.html', {'error_message': str(e)})
+        
 
 class CollectLoan(View):
     # acc_number

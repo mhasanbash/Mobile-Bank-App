@@ -1,0 +1,28 @@
+{% extends "base.html" %} 
+{% block LOAN %}active{%endblock%}
+
+{% block Dashboard %}
+<div class="col-sm-12 col-xl-6">
+    <div class="bg-light rounded h-100 p-4">
+        <h6 class="mb-4">جدول امتیاز ها</h6>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">شماره حساب</th>
+                    <th scope="col">امتیاز</th>
+                    <th scope="col">وام فعال</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for res in results %}
+                <tr>
+                    <td>{{res.0}}</td>
+                    <td>{{res.1}}</td>
+                    <td>{{res.2}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -100,14 +100,15 @@
             <div class="nav-item dropdown">
               <a
                 href="#"
-                class="nav-link dropdown-toggle"
+                class="nav-link dropdown-toggle {% block LOAN %}{%endblock%}"
                 data-bs-toggle="dropdown"
                 ><i class="fa fa-laptop me-2"></i>وام </a
               >
               <div class="dropdown-menu bg-transparent border-0">
-                <a href="button.html" class="dropdown-item">Buttons</a>
-                <a href="typography.html" class="dropdown-item">Typography</a>
-                <a href="element.html" class="dropdown-item">Other Elements</a>
+                <a href="button.html" class="dropdown-item">دریافت وام</a>
+                <a href="button.html" class="dropdown-item">لیست  وام ها</a>
+                <a href="typography.html" class="dropdown-item">لیست اقساط</a>
+                <a href="{% url 'management:point' %}" class="dropdown-item">محاسبه امتیاز</a>
               </div>
             </div>
             <a href="{% url 'management:MakeTransection' %}" class="nav-item nav-link {% block transfering %}{%endblock%}"
