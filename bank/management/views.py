@@ -81,20 +81,24 @@ class Signin(View):
             
             try : 
                 with connection.cursor() as cursor:
-                    cursor.execute("SELECT * FROM USERS WHERE username = %s and password = %s", [username, password])
+                    cursor.execute("SELECT signin(%s,%s)", [username, password])
                     instances = cursor.fetchall()
                     
+                    res = instances[0][0]
+                    res = res[1: len(res) - 1]
+                    res = res.split(',')
+                    print(res)
                     if instances:
-                        request.session['user_id'] = instances[0][0]
-                        request.session['username'] = instances[0][1]
-                        request.session['password'] = instances[0][2]
-                        request.session['first_name'] = instances[0][3]
-                        request.session['last_name'] = instances[0][4]
-                        request.session['address'] = instances[0][5]
-                        request.session['phonenumber'] = instances[0][6]
-                        request.session['email'] = instances[0][7]
-                        request.session['date_joined'] = instances[0][8].isoformat()
-                        request.session['is_superuser'] = instances[0][9]
+                        request.session['user_id'] = res[0]
+                        request.session['username'] = res[1]
+                        request.session['password'] = res[2]
+                        request.session['first_name'] = res[3]
+                        request.session['last_name'] = res[4]
+                        request.session['address'] = res[5]
+                        request.session['phonenumber'] = res[6]
+                        request.session['email'] = res[7]
+                        request.session['date_joined'] = res[8]
+                        request.session['is_superuser'] = res[9]
                     return HttpResponseRedirect(reverse('management:Home'))
 
             except Exception as e:
@@ -102,7 +106,6 @@ class Signin(View):
 
         else:
             return render(request, 'error.html', {'error_message': 'فرم ورود معتبر نیست'})
-            # return render(request, 'home.html')
 
 
 def signout(request):
