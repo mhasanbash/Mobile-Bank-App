@@ -10,16 +10,27 @@ from datetime import date, timedelta
 
 class Home(View):
     def get(self, request):
-        # کد برای پردازش درخواست GET
-         #یک کوئری برای برای دریافت حساب های یک شخص با user id
         try : 
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM BANK_ACCOUNT WHERE user_id = %s", [request.session["user_id"]])
+                result = []
+                cursor.execute("SELECT account_list(%s)", [request.session["user_id"]])
                 instances = cursor.fetchall()
-                # for i in instances:
-
+                for ins in instances:
+                    ins = ins[0]
+                    ins = ins[1: len(ins) - 1]
+                    ins = ins.split(',')
+                    res = {
+                        "id" : ins[0],
+                        "user_id" : ins[1],
+                        "acc_num" : ins[2],
+                        "pass" : ins[3],
+                        "balance" : ins[5],
+                        "date_open" : ins[7],
+                        "acc_status" : ins[9]
+                    }
+                    result.append(res)
                 print(instances)
-                return render(request, "home.html", {'accounts' : instances})
+                return render(request, "home.html", {'accounts' : result})
             
         except Exception as e:
             return render(request, 'error.html', {'error_message': str(e)})
