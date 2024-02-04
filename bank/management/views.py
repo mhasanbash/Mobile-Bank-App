@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .form import SignInForm, CreateAccForm, MakeTransactionForm, AccountTurnoverForm
+from .form import SignInForm, CreateAccForm, MakeTransactionForm, AccountTurnoverForm, LoanPaymentForm
 from django.views import View
 from django.http import HttpResponse
 from django.db import connection
@@ -310,13 +310,73 @@ class LoanList(View):
         except Exception as e:
                 return render(request, 'error.html', {'error_message': str(e)})
 
+
 class LoanInstallmentList(View):
     # Loan id
-    pass
+    def get(self, request):
+        return render(request, 'input.html')
+    def post(self, request):
+        loan_id = request.POST.get('loanid')
+        try : 
+            result = []
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT get_installments(%s)', [loan_id])
+                instances = cursor.fetchall()
+                for ins in instances:
+                    ins = ins[0]
+                    ins = ins[1: len(ins) - 1]
+                    ins = ins.split(',')
+                    res = {
+                        "installment_id" : ins[0],
+                        "load_id" : ins[1],
+                        "acc_num" : ins[2],
+                        "payment_deadline" : ins[3],
+                        "amount" : ins[4],
+                        "date_of_payment" : ins[5],
+                        "status" : ins[6]
+                    }
+                    result.append(res)
+                print(result)
+                sum=0
+                for i in result:
+                    temp = float(i['amount'])
+                    sum = sum + temp
+                print(sum)
+                
+                sum2=0
+                for i in result:
+                    if i['status'] == 't':
+                        temp = float(i['amount'])
+                        sum2 = sum2 + temp
+
+                res = {
+                    'sum' : sum,
+                    'sum2' : sum2,
+                }
+
+                return render(request, 'installment.html', {'results' : result, 'res': res})
+        except Exception as e:
+                return render(request, 'error.html', {'error_message': str(e)})
 
 class LoanInstallmentPayment(View):
     # Loan id 
-    pass
+    def get(self, request):
+        form = LoanPaymentForm()
+        return render(request, 'installment_pay.html', {'form': form})
+    
+    def post(self, request):
+        form = LoanPaymentForm(request.POST)
+        if form.is_valid():
+            loan_id  = form.cleaned_data['loan_id']
+            try :
+                with connection.cursor() as cursor:
+                    cursor.execute('CALL pay_earliest_installment(%s)', [loan_id])
+                    return HttpResponseRedirect(reverse('management:Home'))
+
+            except Exception as e:
+                return render(request, 'error.html', {'error_message': str(e)})
+        else:
+            return render(request, 'error.html', {'error_message': form.errors})
 
 
 

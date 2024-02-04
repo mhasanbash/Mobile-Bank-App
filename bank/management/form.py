@@ -60,5 +60,16 @@ class AccountTurnoverForm(forms.Form):
     number = forms.IntegerField(required=False)
     start_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
     end_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-        
-        
+
+
+class LoanPaymentForm(forms.Form):
+    acc_number = forms.CharField(max_length=32)
+    loan_id = forms.IntegerField()
+    password = forms.CharField(max_length=32)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password'].widget.attrs.update({'class': 'form-control'})
+        self.fields['loan_id'].widget.attrs.update({'class': 'form-control'})
+        self.fields['acc_number'].widget.attrs.update({'class': 'form-control'})
+         

@@ -5,38 +5,46 @@
 <div class="container-fluid pt-4 px-4">
     <div class="bg-light text-center rounded p-4">
         <div class="d-flex align-items-center justify-content-between mb-4">
-            <h6 class="mb-0">لیست حساب ها</h6>
+            <h6 class="mb-0">لیست اقساط</h6>
         </div>
         <div class="table-responsive">
             <table class="table text-start align-middle table-bordered table-hover mb-0">
                 <thead>
                     <tr class="text-dark">
+                        <th scope="col">شماره قسط</th>
+                        <th scope="col">شماره وام</th>
                         <th scope="col">شماره حساب</th>
-                        <th scope="col">امتیاز</th>
-                        <th scope="col">صاحب حساب</th>
-                        <th scope="col">وضعیت حساب</th>
-                        <th scope="col">دریافت</th>
+                        <th scope="col">مهلت پرداخت</th>
+                        <th scope="col"> مقدار</th>
+                        <th scope="col">وضعیت پرداخت</th>
+                        <th scope="col">تاریخ پرداخت</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for res in results %}
+                    {% for result in results %}
                         <tr>
                             <form method="post" action="">
                                 {% csrf_token %}
-                                <td><input type="hidden" name="account_number" value="{{res.0}}">{{res.0}}</td>
-                                <td><input type="hidden" name="score" value="{{res.2}}">{{res.2}}</td>
-                                <td><input type="hidden" name="account_owner" value="{{request.session.first_name}} {{request.session.last_name}}">{{request.session.first_name}} {{request.session.last_name}}</td>
-                                {%if res.1 %}
-                                <td><input type="hidden" name="account_status" value="فعال">فعال</td>
+                                <td><input type="hidden" name="installment_id" value="{{result.installment_id}}">{{result.installment_id}}</td>
+                                <td><input type="hidden" name="load_id" value="{{result.load_id}}">{{result.load_id}}</td>
+                                <td><input type="hidden" name="acc_num" value="{{result.acc_num}}">{{result.acc_num}}</td>
+                                <td><input type="hidden" name="score" value="{{result.payment_deadline}}">{{result.payment_deadline}}</td>
+                                <td><input type="hidden" name="account_owner" value="{{result.amount}}">{{result.amount}}</td>
+                                <td><input type="hidden" name="account_status" value="{{result.date_of_payment}}">{{result.date_of_payment}}</td>
+                                {% if result.status == 'f'%}
+                                <td><input type="hidden" name="account_number" value="پرداخت نشده">پرداخت نشده</td>
                                 {%else%}
-                                <td><input type="hidden" name="account_status" value="غیر فعال">غیر فعال</td>
-                                {% endif %}
-                                {% if not res.3 %}
-                                <td><input type="submit" class="btn btn-outline-warning m-2" value="COLLECT"></td>
+                                <td><input type="hidden" name="account_number" value="پرداخت شده">پرداخت شده</td>
                                 {% endif %}
                             </form>
                         </tr>
                     {% endfor %}
+                    
+                    <tr>
+                    <td>{{res.sum2}}مقدار پرداخت شده</td>
+                    <td>{{res.sum}}مقدار  کل</td>
+                    <td><a href="{% url 'management:installment_pay'%}"><input type="submit" class="btn btn-outline-warning m-2" value="پرداخت آخرین قسط"></td>
+                    </tr>
 
                 </tbody>
             </table>

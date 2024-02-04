@@ -1,0 +1,31 @@
+{% extends "base.html" %} 
+{% block LOAN %}active{%endblock%}
+
+{% block Dashboard %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-6">
+            <div class="bg-light rounded h-100 p-4">
+                <h6 class="mb-4">Basic Form</h6>
+                <form method="post" action"">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">ACCOUNT NUMBER</label>
+                        {{ form.acc_number }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleInputPassword1" class="form-label">lOAN ID</label>
+                        {{ form.loan_id }}
+                    </div>
+                    <div class="mb-3 form-check">
+                        <label class="form-check-label" for="exampleCheck1">PASSWORD</label>
+                        {{ form.password }}
+                    </div>
+                    <button type="submit" class="btn btn-lg btn-warning">پرداخت</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+        
+{% endblock %}
