@@ -79,7 +79,51 @@ CREATE TABLE MINIMUMMONEY
 );
 
 
+---------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE change_password(
+  IN p_user_id integer,
+  IN p_old_password varchar(32),
+  IN p_new_password varchar(32)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE USERS
+    SET password = p_new_password
+    WHERE id = p_user_id and password = p_old_password;
+
+    COMMIT;
+END;
+$$;
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION signin(
+  IN i_username varchar(32),
+  IN i_password varchar(32)
+) RETURNS TABLE (
+  id INT,
+  username varchar(32),
+  password varchar(32),
+  first_name varchar(32),
+  last_name varchar(32),
+  aaddres varchar(255),
+  phone_number varchar(20),
+  email        varchar(32),
+  date_joined  date,
+  is_superuser boolean
+) LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT *
+    FROM USERS as u
+    WHERE u.username = i_username and u.password = i_password;
+END;
+$$;
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 CREATE OR REPLACE PROCEDURE create_account(
   IN p_user_id integer,
   IN p_account_number varchar(20),
