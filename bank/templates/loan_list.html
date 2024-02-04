@@ -1,0 +1,46 @@
+{% extends "base.html" %} 
+{% block LOAN %}active{%endblock%}
+
+{% block Dashboard %}
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light text-center rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0">لیست وام ها</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                <thead>
+                    <tr class="text-dark">
+                        <th scope="col">شماره وام</th>
+                        <th scope="col">شماره حساب</th>
+                        <th scope="col">مقدار وام</th>
+                        <th scope="col">تاریخ دریافت وام</th>
+                        <th scope="col">تاریخ تسویه حساب</th>
+                        <th scope="col">وضعیت وام</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <form method="post" action="">
+                                {% csrf_token %}
+                                <td><input type="hidden" name="account_number" value="{{result.load_id}}">{{result.load_id}}</td>
+                                <td><input type="hidden" name="account_number" value="{{result.acc_num}}">{{result.acc_num}}</td>
+                                <td><input type="hidden" name="score" value="{{result.amount}}">{{result.amount}}</td>
+                                <td><input type="hidden" name="account_owner" value="{{result.start_date}}">{{result.start_date}}</td>
+                                <td><input type="hidden" name="account_status" value="{{result.end_date}}">{{result.end_date}}</td>
+                                {% if result.status == 'f'%}
+                                <td><input type="hidden" name="account_number" value="کامل نشده">کامل نشده</td>
+                                {%else%}
+                                <td><input type="hidden" name="account_number" value="کامل شده">کامل شده</td>
+                                {% endif %}
+                            </form>
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

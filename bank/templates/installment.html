@@ -1,0 +1,46 @@
+{% extends "base.html" %} 
+{% block LOAN %}active{%endblock%}
+
+{% block Dashboard %}
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light text-center rounded p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0">لیست حساب ها</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                <thead>
+                    <tr class="text-dark">
+                        <th scope="col">شماره حساب</th>
+                        <th scope="col">امتیاز</th>
+                        <th scope="col">صاحب حساب</th>
+                        <th scope="col">وضعیت حساب</th>
+                        <th scope="col">دریافت</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in results %}
+                        <tr>
+                            <form method="post" action="">
+                                {% csrf_token %}
+                                <td><input type="hidden" name="account_number" value="{{res.0}}">{{res.0}}</td>
+                                <td><input type="hidden" name="score" value="{{res.2}}">{{res.2}}</td>
+                                <td><input type="hidden" name="account_owner" value="{{request.session.first_name}} {{request.session.last_name}}">{{request.session.first_name}} {{request.session.last_name}}</td>
+                                {%if res.1 %}
+                                <td><input type="hidden" name="account_status" value="فعال">فعال</td>
+                                {%else%}
+                                <td><input type="hidden" name="account_status" value="غیر فعال">غیر فعال</td>
+                                {% endif %}
+                                {% if not res.3 %}
+                                <td><input type="submit" class="btn btn-outline-warning m-2" value="COLLECT"></td>
+                                {% endif %}
+                            </form>
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

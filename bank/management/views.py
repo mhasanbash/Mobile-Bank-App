@@ -6,6 +6,7 @@ from django.db import connection
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from datetime import date, timedelta
 
 class Home(View):
     def get(self, request):
@@ -197,14 +198,15 @@ def account_detail(request):
     return HttpResponse(response)
 
 
-
 class AccountOwner(View):
     # acc_number
     pass
 
+
 class BlockAccount(View):
     # acc_number
     pass
+
 
 class MakeTransection(View):
     # source acc_num and dest acc_num and amount
@@ -233,7 +235,6 @@ class MakeTransection(View):
                         "dst_num" : res[2],
                         "amount" : res[3],
                     }
-                    print(tuple(res))
 
                     return render(request, 'seccessful_transfer.html', {'result': result})
 
@@ -258,11 +259,56 @@ class CalculateLoanPoint(View):
 
 class CollectLoan(View):
     # acc_number
-    pass
+    def get(self, request):
+        try : 
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT acc.account_number, acc.account_status, m.min_amount, m.active_loan FROM BANK_ACCOUNT as acc, MINIMUMMONEY as m WHERE acc.user_id = %s and acc.account_number = m.account_number',[request.session['user_id']])
+                instances = cursor.fetchall()
+                return render(request, 'collect_loan.html', {'results' : instances})
+        except Exception as e:
+                return render(request, 'error.html', {'error_message': str(e)})
+        
+    def post(self, request):
+        acc_number = request.POST.get('account_number')
+        rate= request.POST.get('score')
+        print(acc_number, rate)
+        try : 
+            with connection.cursor() as cursor:
+                today = date.today()
+                sql_date = today.strftime('%Y-%m-%d')
+                next_year = today + timedelta(days=365)
+                sql_enddate = next_year.strftime('%Y-%m-%d')
+                cursor.execute('CALL create_loan_and_installments(%s, %s, %s, %s, %s, %s)', [request.session['user_id'],acc_number,rate, sql_date, sql_enddate, 'False'])
+                return HttpResponse('successful')
+        except Exception as e:
+                return render(request, 'error.html', {'error_message': str(e)})
+
 
 class LoanList(View):
     # user_id 
-    pass
+    def get(self, request):
+        try : 
+            with connection.cursor() as cursor:
+                result = []
+                cursor.execute('SELECT get_loans(%s)', [request.session['user_id']])
+                instances = cursor.fetchall()
+                for ins in instances:
+                    ins = ins[0]
+                    ins = ins[1: len(ins) - 1]
+                    ins = ins.split(',')
+                    res = {
+                        "load_id" : ins[0],
+                        "acc_num" : ins[2],
+                        "amount" : ins[3],
+                        "start_date" : ins[4],
+                        "end_date" : ins[5],
+                        "status" : ins[6]
+                    }
+                    result.append(res)
+                print(result)
+                return render(request, 'loan_list.html', {'results' : result})
+        except Exception as e:
+                return render(request, 'error.html', {'error_message': str(e)})
 
 class LoanInstallmentList(View):
     # Loan id
