@@ -113,9 +113,20 @@ def signout(request):
     return HttpResponseRedirect(reverse('management:signin'))
 
 
-class changePassword(View):
+class ChangePassword(View):
     # user id and old_pass and new_pass
-    pass
+    def get(self, request):
+        return render(request, 'change_password.html')
+    def post(self, request):
+        user_id = request.POST.get('user_id')
+        old_pass = request.POST.get('old_pass')
+        new_pass = request.POST.get('new_pass')
+        try :
+            with connection.cursor() as cursor:
+                cursor.execute('CALL change_password(%s, %s, %s)', [user_id, old_pass, new_pass])
+                return HttpResponseRedirect(reverse('management:Home'))
+        except Exception as e:
+            return render(request, 'error.html', {'error_message': str(e)})
 
 
 class AccountDetail(View):
@@ -199,11 +210,6 @@ def account_detail(request):
             except Exception as e:
                 response = "شماره حساب اشتباه است"
     return HttpResponse(response)
-
-
-class AccountOwner(View):
-    # acc_number
-    pass
 
 
 class BlockAccount(View):
@@ -360,6 +366,7 @@ class LoanInstallmentList(View):
                 return render(request, 'installment.html', {'results' : result, 'res': res})
         except Exception as e:
                 return render(request, 'error.html', {'error_message': str(e)})
+
 
 class LoanInstallmentPayment(View):
     # Loan id 
