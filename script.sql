@@ -79,6 +79,7 @@ CREATE TABLE MINIMUMMONEY
 );
 
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE PROCEDURE create_account(
   IN p_user_id integer,
   IN p_account_number varchar(20),
@@ -109,7 +110,7 @@ END;
 $$;
 
 
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION transfer_fund(
   IN source_account varchar(32),
   IN destination_account varchar(32),
@@ -166,7 +167,7 @@ END;
 $$;
 
 
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION last_transactions(
   IN source_account varchar(32),
   IN n INT
@@ -190,6 +191,7 @@ END;
 $$;
 
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION last_transactions_date(
   IN source_account varchar(32),
   IN start_date DATE,
@@ -209,5 +211,135 @@ BEGIN
     FROM TRANSACTIONS as t
     WHERE  t.transaction_date >= start_date and t.transaction_date<= end_date and (t.source_account_number = source_account or t.destination_account_number = source_account)
     ORDER BY transaction_date ASC;
+END;
+$$;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE create_loan_and_installments(
+  IN p_user_id integer,
+  IN p_account_number varchar(20),
+  IN p_loan_amount numeric(20, 2),
+  IN p_start_date timestamp,
+  IN p_end_date timestamp,
+  IN p_loan_status boolean
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_loan_id integer;
+  v_installment_amount numeric(20, 2);
+BEGIN
+  -- ایجاد یک instance از loan
+  INSERT INTO LOAN(user_id, account_number, loan_amount, start_date, end_date, loan_status)
+  VALUES (p_user_id, p_account_number, p_loan_amount, p_start_date, p_end_date, p_loan_status)
+  RETURNING id INTO v_loan_id;
+
+  -- محاسبه مبلغ هر قسط با احتساب 20% سود
+  v_installment_amount := (p_loan_amount * 1.20) / 12;
+
+  UPDATE MINIMUMMONEY
+  SET active_loan = True
+  WHERE account_number = p_account_number;
+  -- ایجاد 12 قسط برای وام
+  FOR i IN 1..12 LOOP
+    INSERT INTO LOAN_INSTALLMENT(loan_id, account_number, payment_deadline, amount, date_of_payment, status)
+    VALUES (v_loan_id, p_account_number, (p_start_date::date + i * INTERVAL '1 month')::date, v_installment_amount, NULL, false);
+  END LOOP;
+END;
+$$;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_loans(
+IN p_user_id integer
+)
+RETURNS TABLE (
+  id integer,
+  user_id integer,
+  account_number varchar(20),
+  loan_amount numeric(20, 2),
+  start_date timestamp,
+  end_date timestamp,
+  loan_status boolean
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT * FROM LOAN
+  WHERE LOAN.user_id = p_user_id;
+END; $$
+LANGUAGE plpgsql;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_installments(p_loan_id integer)
+RETURNS TABLE (
+  id integer,
+  loan_id integer,
+  account_number varchar(20),
+  payment_deadline date,
+  amount numeric(20, 2),
+  date_of_payment date,
+  status boolean
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT * FROM LOAN_INSTALLMENT as l WHERE l.loan_id = p_loan_id;
+END; $$
+LANGUAGE plpgsql;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE pay_earliest_installment(loana_id integer)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_id integer;
+  v_installment_amount numeric(20, 2);
+  v_acc_num varchar(32);
+  b_balance DEC;
+  count integer;
+BEGIN
+    -- بدست آوردن مبلغ قسط زودترین قسط پرداخت نشده
+  SELECT li.amount, li.id, li.account_number INTO v_installment_amount, v_id, v_acc_num FROM LOAN_INSTALLMENT as li
+  WHERE li.loan_id = loana_id AND status = false
+  ORDER BY payment_deadline ASC
+  LIMIT 1;
+
+  -- بروزرسانی وضعیت قسط به پرداخت شده
+  UPDATE LOAN_INSTALLMENT as li SET status = true
+  WHERE li.id = v_id AND status = false;
+
+  -- کاهش مقدار قسط از موجودی حساب
+  UPDATE BANK_ACCOUNT SET balance = balance - v_installment_amount
+  WHERE account_number = v_acc_num;
+
+  SELECT b.balance INTO b_balance FROM BANK_ACCOUNT as b
+  WHERE b.account_number = v_acc_num;
+
+  -- محاسبه امتیاز
+  UPDATE MINIMUMMONEY
+  SET min_amount = b_balance
+  WHERE date <= (CURRENT_DATE - INTERVAL '2 months') AND account_number = v_acc_num;
+
+  UPDATE MINIMUMMONEY
+  SET min_amount = LEAST(min_amount, b_balance)
+  WHERE date > (CURRENT_DATE - INTERVAL '2 months') AND account_number = v_acc_num;
+
+
+  --به وجود اوردن یک نمونه از transaction
+  INSERT INTO TRANSACTIONS(source_account_number, destination_account_number, amount, transaction_date, status)
+  VALUES (v_acc_num, 'bank', v_installment_amount, now(),True);
+
+  --چک کردن اخرین قسط
+  SELECT COUNT(*) INTO count
+  FROM LOAN_INSTALLMENT
+  WHERE loan_id = loana_id AND status = FALSE;
+
+  IF count = 0 THEN
+      UPDATE LOAN
+      SET loan_status = TRUE
+      WHERE id = loana_id;
+  END IF;
 END;
 $$;
