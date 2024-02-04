@@ -12,6 +12,7 @@ CREATE Table USERS
     is_superuser boolean
 );
 
+
 CREATE TABLE BANK_ACCOUNT
 (
     id                 SERIAL PRIMARY KEY,
@@ -30,28 +31,51 @@ CREATE TABLE BANK_ACCOUNT
 
 CREATE TABLE LOAN
 (
-    id             integer,
+    id             SERIAL PRIMARY KEY,
     user_id        integer,
     account_number varchar(20),
     loan_amount    numeric(20, 2),
     start_date     timestamp,
     end_date       timestamp,
     loan_status    boolean,
-    PRIMARY KEY(id,user_id),
-    FOREIGN KEY(user_id) REFERENCES BANK_ACCOUNT(user_id),
+    FOREIGN KEY(user_id) REFERENCES USERS(id),
     FOREIGN KEY(account_number) REFERENCES BANK_ACCOUNT(account_number)
 );
 
+
+CREATE TABLE LOAN_INSTALLMENT
+(
+    id               SERIAL PRIMARY KEY,
+    loan_id          integer unique ,
+    account_number   varchar(20),
+    payment_deadline Date,
+    amount           numeric(20, 2),
+    date_of_payment  Date,
+    status           boolean,
+    FOREIGN KEY(loan_id) REFERENCES LOAN(id)
+);
+
+
 CREATE TABLE TRANSACTIONS
 (
-    id                         integer primary key,
-    source_account_number      varchar(20),
-    destination_account_number varchar(20),
+    id                         SERIAL PRIMARY KEY,
+    source_account_number      varchar(32),
+    destination_account_number varchar(32),
     amount                     numeric(10, 2),
-    transaction_date           timestamp,
+    transaction_date           date,
     status                     boolean,
     description                varchar(255),
     FOREIGN KEY (source_account_number) REFERENCES BANK_ACCOUNT (account_number)
+);
+
+
+CREATE TABLE MINIMUMMONEY
+(
+    id             SERIAL PRIMARY KEY,
+    account_number varchar(32),
+    min_amount     numeric(10, 2),
+    date           DATE,
+    active_loan    boolean
 );
 
 
