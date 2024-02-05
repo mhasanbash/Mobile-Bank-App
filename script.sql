@@ -79,6 +79,34 @@ CREATE TABLE MINIMUMMONEY
 );
 
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION account_info(
+  IN acc_number varchar(32)
+) RETURNS TABLE (
+  username varchar(32),
+  password varchar(32),
+  first_name varchar(32),
+  last_name varchar(32),
+  aaddres varchar(255),
+  phone_number varchar(20),
+  email        varchar(32),
+  date_joined  date,
+  account_number     varchar(20),
+  primary_password   varchar(4),
+  Balance            numeric(20, 2),
+  date_opened        DATE,
+  account_status     boolean
+)LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT u.username, u.password, u.first_name, u.last_name, u.address, u.phone_number, u.email, u.date_joined, ba.account_number, ba.primary_password, ba.Balance,ba.date_opened,ba.account_status
+    FROM USERS as u, BANK_ACCOUNT as ba
+    WHERE ba.account_number = acc_number and u.id = ba.user_id ;
+END;
+$$;
+
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION account_list(
   IN i_user_id integer
