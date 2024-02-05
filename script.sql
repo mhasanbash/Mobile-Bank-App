@@ -79,9 +79,18 @@ CREATE TABLE MINIMUMMONEY
 );
 
 
+CREATE TABLE Block_Account
+(
+    id SERIAL PRIMARY KEY,
+    account_number varchar(32),
+    discriptions varchar(64),
+    FOREIGN KEY(account_number) REFERENCES BANK_ACCOUNT(account_number)
+);
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE PROCEDURE block_account(
-  IN acc_number varchar(32)
+  IN acc_number varchar(32),
+  IN i_discription varchar(32)
 )
 LANGUAGE plpgsql
 AS $$
@@ -90,10 +99,27 @@ BEGIN
     SET account_status = False
     WHERE account_number = acc_number;
 
+    Insert into Block_Account(account_number, discriptions) values(acc_number, i_discription);
+
     COMMIT;
 END;
 $$;
 
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE PROCEDURE active_account(
+  IN acc_number varchar(32)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE BANK_ACCOUNT
+    SET account_status = True
+    WHERE account_number = acc_number;
+
+    COMMIT;
+END;
+$$;
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION account_info(
   IN acc_number varchar(32)
