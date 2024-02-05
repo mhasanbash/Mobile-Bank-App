@@ -79,6 +79,21 @@ CREATE TABLE MINIMUMMONEY
 );
 
 
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE block_account(
+  IN acc_number varchar(32)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE BANK_ACCOUNT
+    SET account_status = False
+    WHERE account_number = acc_number;
+
+    COMMIT;
+END;
+$$;
+
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION account_info(
   IN acc_number varchar(32)
