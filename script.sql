@@ -46,7 +46,7 @@ CREATE TABLE LOAN
 CREATE TABLE LOAN_INSTALLMENT
 (
     id               SERIAL PRIMARY KEY,
-    loan_id          integer unique ,
+    loan_id          integer ,
     account_number   varchar(20),
     payment_deadline Date,
     amount           numeric(20, 2),
