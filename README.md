@@ -1,4 +1,6 @@
 Mobile Banking Application - Database Project
+
+
 This project demonstrates the design and implementation of a Mobile Banking Application Database. The main focus is on creating a robust database system to handle various banking operations efficiently and securely.
 
 #Project Structure
