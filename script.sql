@@ -229,13 +229,13 @@ CREATE OR REPLACE PROCEDURE create_account(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  -- ایجاد یک transaction
+  --  transaction
   BEGIN
-    -- ایجاد یک نمونه در جدول BANK_ACCOUNT
+    --  BANK_ACCOUNT
     INSERT INTO BANK_ACCOUNT(user_id, account_number, primary_password, Balance, date_opened, account_status)
     VALUES (p_user_id, p_account_number, p_primary_password, p_balance, p_date_opened, p_account_status);
 
-    -- ایجاد یک نمونه در جدول MINIMUMMONEY
+    -- MINIMUMMONEY
     INSERT INTO MINIMUMMONEY(account_number, min_amount, date)
     VALUES (p_account_number, p_balance, p_date_opened);
   EXCEPTION
@@ -368,18 +368,15 @@ DECLARE
   v_loan_id integer;
   v_installment_amount numeric(20, 2);
 BEGIN
-  -- ایجاد یک instance از loan
   INSERT INTO LOAN(user_id, account_number, loan_amount, start_date, end_date, loan_status)
   VALUES (p_user_id, p_account_number, p_loan_amount, p_start_date, p_end_date, p_loan_status)
   RETURNING id INTO v_loan_id;
 
-  -- محاسبه مبلغ هر قسط با احتساب 20% سود
   v_installment_amount := (p_loan_amount * 1.20) / 12;
 
   UPDATE MINIMUMMONEY
   SET active_loan = True
   WHERE account_number = p_account_number;
-  -- ایجاد 12 قسط برای وام
   FOR i IN 1..12 LOOP
     INSERT INTO LOAN_INSTALLMENT(loan_id, account_number, payment_deadline, amount, date_of_payment, status)
     VALUES (v_loan_id, p_account_number, (p_start_date::date + i * INTERVAL '1 month')::date, v_installment_amount, NULL, false);
@@ -438,24 +435,24 @@ DECLARE
   b_balance DEC;
   count integer;
 BEGIN
-    -- بدست آوردن مبلغ قسط زودترین قسط پرداخت نشده
+
   SELECT li.amount, li.id, li.account_number INTO v_installment_amount, v_id, v_acc_num FROM LOAN_INSTALLMENT as li
   WHERE li.loan_id = loana_id AND status = false
   ORDER BY payment_deadline ASC
   LIMIT 1;
 
-  -- بروزرسانی وضعیت قسط به پرداخت شده
+
   UPDATE LOAN_INSTALLMENT as li SET status = true
   WHERE li.id = v_id AND status = false;
 
-  -- کاهش مقدار قسط از موجودی حساب
+
   UPDATE BANK_ACCOUNT SET balance = balance - v_installment_amount
   WHERE account_number = v_acc_num;
 
   SELECT b.balance INTO b_balance FROM BANK_ACCOUNT as b
   WHERE b.account_number = v_acc_num;
 
-  -- محاسبه امتیاز
+
   UPDATE MINIMUMMONEY
   SET min_amount = b_balance
   WHERE date <= (CURRENT_DATE - INTERVAL '2 months') AND account_number = v_acc_num;
@@ -465,11 +462,11 @@ BEGIN
   WHERE date > (CURRENT_DATE - INTERVAL '2 months') AND account_number = v_acc_num;
 
 
-  --به وجود اوردن یک نمونه از transaction
+
   INSERT INTO TRANSACTIONS(source_account_number, destination_account_number, amount, transaction_date, status)
   VALUES (v_acc_num, 'bank', v_installment_amount, now(),True);
 
-  --چک کردن اخرین قسط
+
   SELECT COUNT(*) INTO count
   FROM LOAN_INSTALLMENT
   WHERE loan_id = loana_id AND status = FALSE;

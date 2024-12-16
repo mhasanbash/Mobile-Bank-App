@@ -7,6 +7,7 @@ from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from datetime import date, timedelta
+from django.shortcuts import redirect
 
 class Home(View):
     def get(self, request):
@@ -33,7 +34,7 @@ class Home(View):
                 return render(request, "home.html", {'accounts' : result})
             
         except Exception as e:
-            return render(request, 'error.html', {'error_message': str(e)})
+            return redirect('/signin')
         
 
 class Profile(View):
