@@ -90,7 +90,9 @@ A simplified banking system that includes features such as user authentication, 
 ---
 
 ## 🎨 **Screenshots**
-_Add screenshots of your app (login page, dashboard, transaction history, etc.) for better visualization._
+![image](https://github.com/user-attachments/assets/84919cdf-f3ba-4e52-bd38-a3858474c329)
+![image](https://github.com/user-attachments/assets/4369911f-b7b9-4d35-9982-0bf878c44938)
+
 
 ---
 
