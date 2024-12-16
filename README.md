@@ -57,6 +57,14 @@ A simplified banking system that includes features such as user authentication, 
 ---
 
 ## 📊 **How to Use**
+Prerequisites
+Install PostgreSQL on your machine.
+Refer to the official PostgreSQL documentation for installation instructions.
+Run the SQL scripts provided in script.sql to set up the database schema and stored procedures:
+```bash
+psql -U <your_username> -d <your_database> -f script.sql
+```
+Manually create a user in the users table with the necessary credentials to log in to the application.
 
 1. Clone the repository:  
    ```bash
