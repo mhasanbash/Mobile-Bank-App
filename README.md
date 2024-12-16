@@ -60,12 +60,12 @@ A simplified banking system that includes features such as user authentication, 
 
 1. Clone the repository:  
    ```bash
-   git clone https://github.com/your-username/mobile-banking-app.git
+   git clone https://github.com/mhasanbash/Mobile-Bank-App.git
    ```
 
 2. Navigate to the project directory:  
    ```bash
-   cd mobile-banking-app
+    cd Mobile-Bank-App/
    ```
 
 3. Install dependencies:  
@@ -85,7 +85,7 @@ A simplified banking system that includes features such as user authentication, 
    ```
 
 6. Access the application at:  
-   [http://localhost:8000](http://localhost:8000)
+   [http://localhost:8000/Home](http://localhost:8000/Home)
 
 ---
 
@@ -101,4 +101,3 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ---
 
-Would you like me to generate badges (e.g., license, Python version) or add more sections?
